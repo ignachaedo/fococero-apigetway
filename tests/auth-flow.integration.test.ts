@@ -1,33 +1,39 @@
+/**
+ * Pruebas de integración del flujo de autenticación (Auth Flow) en el API Gateway
+ * 
+ * @module auth-flow.integration
+ */
+
 jest.mock('firebase-admin');
 
 import request from 'supertest';
 import app from '../src/app';
 import * as admin from 'firebase-admin';
 
-describe('API Gateway - Auth Flow Integration', () => {
+describe('API Gateway - Integración del Flujo de Autenticación', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should allow public auth routes (login) without Firebase token', async () => {
+  it('debería permitir rutas públicas de autenticación (login) sin token de Firebase', async () => {
     const res = await request(app)
       .post('/api/auth/login')
       .send({ rut: '12345678-9', password: 'test123' });
 
-    // Since ms-auth is unreachable in tests, it returns 502 (proxy error)
-    // But it should NOT return 401 (auth error) — login is public
+    // Como ms-auth está inalcanzable en las pruebas, retorna 502 (error de proxy)
+    // Pero NO debería retornar 401 (error de autenticación) — login es público
     expect(res.status).toBe(502);
     expect(res.status).not.toBe(401);
   });
 
-  it('should reject protected route without Authorization header', async () => {
+  it('debería rechazar ruta protegida sin cabecera Authorization', async () => {
     const res = await request(app).get('/api/emergencias');
     expect(res.status).toBe(401);
     expect(res.body).toHaveProperty('ok', false);
     expect(res.status).not.toBe(200);
   });
 
-  it('should reject protected route with invalid Firebase token', async () => {
+  it('debería rechazar ruta protegida con token de Firebase inválido', async () => {
     (admin.auth().verifyIdToken as jest.Mock).mockRejectedValueOnce(
       new Error('Invalid token'),
     );
@@ -38,7 +44,7 @@ describe('API Gateway - Auth Flow Integration', () => {
     expect(res.status).toBe(401);
   });
 
-  it('should inject x-user-id and x-user-role headers for authenticated requests', async () => {
+  it('debería inyectar cabeceras x-user-id y x-user-role para peticiones autenticadas', async () => {
     const fakeDecodedToken = {
       uid: 'firebase-uid-123',
       email: 'test@fococero.cl',
@@ -56,7 +62,7 @@ describe('API Gateway - Auth Flow Integration', () => {
     expect(res.status).toBe(502);
   });
 
-  it('should strip spoofed x-user-id headers from incoming requests', async () => {
+  it('debería eliminar cabeceras x-user-id falsificadas de las peticiones entrantes', async () => {
     const fakeDecodedToken = {
       uid: 'firebase-uid-456',
       email: 'user@test.cl',
@@ -76,12 +82,12 @@ describe('API Gateway - Auth Flow Integration', () => {
     expect(res.status).toBe(502);
   });
 
-  it('should return 502 when proxied service is unreachable (auth endpoint up)', async () => {
+  it('debería retornar 502 cuando el servicio proxy está inalcanzable (endpoint auth activo)', async () => {
     const res = await request(app).post('/api/auth/login');
     expect(res.status).toBe(502);
   });
 
-  it('should return 401 for expired Firebase tokens', async () => {
+  it('debería retornar 401 para tokens de Firebase expirados', async () => {
     (admin.auth().verifyIdToken as jest.Mock).mockRejectedValueOnce({
       code: 'auth/id-token-expired',
     });
