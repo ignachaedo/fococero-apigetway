@@ -1,4 +1,9 @@
-// api-gateway/src/routes/routes.ts
+/**
+ * @fileoverview Definición de rutas y proxies del API Gateway.
+ * Configura los túneles de comunicación hacia cada microservicio
+ * mediante http-proxy-middleware, aplicando middlewares de trazabilidad,
+ * autenticación y path rewriting según corresponda.
+ */
 
 import { Router, Request, Response } from "express";
 import { createProxyMiddleware, Options } from "http-proxy-middleware";
@@ -9,6 +14,7 @@ import { logger } from "../config/logger";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { traceIdMiddleware } from "../middlewares/traceId";
 
+/** Router principal del API Gateway */
 export const appRoutes = Router();
 
 // ============================================================================
@@ -25,6 +31,18 @@ appRoutes.get("/health", (_req: Request, res: Response) => {
 // ============================================================================
 // 🛠️ CONFIGURACIÓN MAESTRA DEL PROXY
 // ============================================================================
+
+/**
+ * Genera las opciones de configuración para un proxy HTTP hacia un microservicio.
+ *
+ * @description Crea la configuración estándar de proxy incluyendo propagación de
+ * Trace ID (x-trace-id, x-correlation-id), inyección del token interno de seguridad
+ * (x-internal-token) para autenticación zero-trust, y manejo de errores con respuesta 502.
+ *
+ * @param target - URL base del microservicio destino (ej: http://ms-auth:3001)
+ * @param pathRewrite - Reglas de reescritura de path (opcional, mapa o función)
+ * @returns Options - Configuración completa para http-proxy-middleware
+ */
 const getProxyOptions = (target: string, pathRewrite?: Record<string, string> | ((path: string) => string)): Options => ({
   target,
   changeOrigin: true,

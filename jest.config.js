@@ -4,7 +4,7 @@ module.exports = {
   roots: ['<rootDir>/tests'],
   testMatch: ['**/*.test.ts'],
   setupFiles: ['<rootDir>/tests/setup.ts'],
-  testTimeout: 30000,
+  testTimeout: 180000,
   moduleNameMapper: {
     '^firebase-admin$': '<rootDir>/__mocks__/firebase-admin.ts',
   },

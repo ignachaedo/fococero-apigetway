@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Middleware de autenticación para API Gateway.
+ * Verifica tokens JWT de Firebase en las peticiones entrantes,
+ * inyecta datos del usuario autenticado en los headers para
+ * los microservicios internos, y aplica bypass para rutas públicas.
+ */
+
 import { Request, Response, NextFunction } from "express";
 import admin from "../config/firebase";
 import { logger } from "../config/logger";
@@ -15,6 +22,20 @@ const bypassPaths = [
   "/api/alertas/publicas",
 ];
 
+/**
+ * Middleware que verifica el token JWT de Firebase en el header Authorization.
+ *
+ * @description Valida la firma criptográfica del token usando Firebase Admin SDK,
+ * limpia headers de spoofing, y propaga la identidad del usuario a los microservicios
+ * mediante headers estandarizados (x-user-id, x-user-email, x-user-role).
+ * Las rutas definidas en `bypassPaths` se saltan la verificación.
+ *
+ * @param req - Objeto Request de Express
+ * @param res - Objeto Response de Express
+ * @param next - Función NextFunction de Express
+ * @returns Promise<void> - No retorna valor, pasa al siguiente middleware o responde con 401
+ * @throws Error - Errores de Firebase (token expirado, inválido) capturados y respondidos como 401
+ */
 export const verifyToken = async (
   req: Request,
   res: Response,

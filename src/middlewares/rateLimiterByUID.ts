@@ -1,10 +1,21 @@
+/**
+ * @fileoverview Middleware de rate limiting basado en Redis.
+ * Limita el número de peticiones por usuario autenticado (x-user-id)
+ * o por dirección IP (para usuarios anónimos) usando ventanas deslizantes.
+ * Incluye reintento automático de conexión a Redis con backoff.
+ */
+
 import { Request, Response, NextFunction } from "express";
 import { getRedisClient } from "../config/redis";
 import { logger } from "../config/logger";
 
+/** Duración de la ventana de rate limiting en milisegundos (15 minutos) */
 const WINDOW_MS = 15 * 60 * 1000;
+/** Duración de la ventana en segundos para Redis TTL */
 const WINDOW_SECS = Math.floor(WINDOW_MS / 1000);
+/** Cantidad máxima de requests permitidos por ventana */
 const MAX_REQUESTS = 200;
+/** Intervalo entre reintentos de conexión a Redis (30 segundos) */
 const REDIS_RETRY_INTERVAL = 30000;
 
 let redisOk = false;
@@ -16,6 +27,20 @@ if (process.env.NODE_ENV === "test") {
     redisOk = false;
 }
 
+/**
+ * Middleware de rate limiting por usuario (UID) o IP.
+ *
+ * @description Limita a MAX_REQUESTS (200) peticiones por ventana de 15 minutos.
+ * Usa el header x-user-id como clave si el usuario está autenticado,
+ * o la dirección IP como fallback. Incluye degradación graceful si Redis no está disponible.
+ * Establece headers estándar de rate limiting (X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset).
+ * Salta la verificación para la ruta /health.
+ *
+ * @param req - Objeto Request de Express
+ * @param res - Objeto Response de Express
+ * @param next - Función NextFunction de Express
+ * @returns Promise<void> - No retorna valor, pasa al siguiente middleware o responde 429
+ */
 export const rateLimiterByUID = async (
     req: Request,
     res: Response,

@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Middleware global de manejo de errores para el API Gateway.
+ * Captura todas las excepciones no manejadas y retorna respuestas estandarizadas
+ * con código de estado HTTP. Oculta detalles de errores internos en producción.
+ */
+
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger';
 
@@ -6,6 +12,15 @@ interface AppError extends Error {
   isOperational?: boolean;
 }
 
+/**
+ * Middleware de manejo global de errores.
+ * Responde con errores operativos tal cual y oculta errores no operativos en producción.
+ *
+ * @param err - Error lanzado (puede incluir statusCode e isOperational)
+ * @param req - Objeto de solicitud Express
+ * @param res - Objeto de respuesta Express
+ * @param next - Función next de Express
+ */
 export function errorMiddleware(
   err: AppError,
   req: Request,
