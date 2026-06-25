@@ -1,13 +1,9 @@
-/**
- * Pruebas unitarias para el endpoint de Salud (Health Check) del API Gateway
- * 
- * @module health
- */
+// tests/health.test.ts
 import request from 'supertest';
 import app from '../src/app';
 
-describe('API Gateway - Salud', () => {
-  it('GET /health debería retornar 200 con estado OK', async () => {
+describe('API Gateway - Health', () => {
+  it('GET /health should return 200 with status OK', async () => {
     const res = await request(app).get('/health');
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('status', 'OK');
@@ -15,9 +11,9 @@ describe('API Gateway - Salud', () => {
     expect(res.body).toHaveProperty('timestamp');
   });
 
-  it('GET /api/docs/ debería retornar 200 para la documentación swagger', async () => {
-    // swagger-ui-express redirige /api/docs -> /api/docs/ (301)
-    // Usar la barra inclinada final evita la redirección
+  it('GET /api/docs/ should return 200 for swagger docs', async () => {
+    // swagger-ui-express redirects /api/docs -> /api/docs/ (301)
+    // Using trailing slash avoids the redirect
     const res = await request(app).get('/api/docs/');
     expect(res.status).toBe(200);
     expect(res.text).toContain('swagger');

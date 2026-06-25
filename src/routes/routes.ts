@@ -1,9 +1,4 @@
-/**
- * @fileoverview Definición de rutas y proxies del API Gateway.
- * Configura los túneles de comunicación hacia cada microservicio
- * mediante http-proxy-middleware, aplicando middlewares de trazabilidad,
- * autenticación y path rewriting según corresponda.
- */
+// api-gateway/src/routes/routes.ts
 
 import { Router, Request, Response } from "express";
 import { createProxyMiddleware, Options } from "http-proxy-middleware";
@@ -14,7 +9,6 @@ import { logger } from "../config/logger";
 import { verifyToken } from "../middlewares/auth.middleware";
 import { traceIdMiddleware } from "../middlewares/traceId";
 
-/** Router principal del API Gateway */
 export const appRoutes = Router();
 
 // ============================================================================
@@ -31,22 +25,9 @@ appRoutes.get("/health", (_req: Request, res: Response) => {
 // ============================================================================
 // 🛠️ CONFIGURACIÓN MAESTRA DEL PROXY
 // ============================================================================
-
-/**
- * Genera las opciones de configuración para un proxy HTTP hacia un microservicio.
- *
- * @description Crea la configuración estándar de proxy incluyendo propagación de
- * Trace ID (x-trace-id, x-correlation-id), inyección del token interno de seguridad
- * (x-internal-token) para autenticación zero-trust, y manejo de errores con respuesta 502.
- *
- * @param target - URL base del microservicio destino (ej: http://ms-auth:3001)
- * @param pathRewrite - Reglas de reescritura de path (opcional, mapa o función)
- * @returns Options - Configuración completa para http-proxy-middleware
- */
-const getProxyOptions = (target: string, pathRewrite?: Record<string, string> | ((path: string) => string)): Options => ({
+const getProxyOptions = (target: string): Options => ({
   target,
   changeOrigin: true,
-  pathRewrite: pathRewrite || undefined,
 
   on: {
     proxyReq: (
@@ -62,10 +43,7 @@ const getProxyOptions = (target: string, pathRewrite?: Record<string, string> | 
         proxyReq.setHeader("x-correlation-id", id);
       }
 
-      // 📍 2. Debug: Registramos la URL exacta que se está proxyando
-      logger.debug(`[Proxy] ${req.method} ${req.url} → ${target}`);
-
-      // 🛡️ 3. Seguridad Zero-Trust: Inyectamos el token interno automáticamente.
+      // 🛡️ 2. Seguridad Zero-Trust: Inyectamos el token interno automáticamente.
       // Esto permite que los MS validen que la petición viene del Gateway.
       proxyReq.setHeader("x-internal-token", envs.INTERNAL_SECRET_TOKEN);
     },
@@ -81,8 +59,8 @@ const getProxyOptions = (target: string, pathRewrite?: Record<string, string> | 
           res.writeHead(502, { "Content-Type": "application/json" });
           res.end(
             JSON.stringify({
-              ok: false,
-              error:
+              success: false,
+              message:
                 "El servicio solicitado está temporalmente fuera de línea.",
             }),
           );
@@ -102,9 +80,7 @@ const getProxyOptions = (target: string, pathRewrite?: Record<string, string> | 
 appRoutes.use(
   "/api/auth",
   traceIdMiddleware,
-  createProxyMiddleware(getProxyOptions(envs.AUTH_SERVICE_URL, {
-    '^/api/auth': ''
-  })),
+  createProxyMiddleware(getProxyOptions(envs.AUTH_SERVICE_URL)),
 );
 
 /**
@@ -115,7 +91,7 @@ appRoutes.use(
   "/api/analitica",
   traceIdMiddleware,
   verifyToken,
-  createProxyMiddleware(getProxyOptions(envs.ANALITICA_SERVICE_URL, (path: string) => '/api/v1/analitica' + path)),
+  createProxyMiddleware(getProxyOptions(envs.ANALITICA_SERVICE_URL)),
 );
 
 /**
@@ -135,9 +111,7 @@ appRoutes.use(
   "/api/reportes",
   traceIdMiddleware,
   verifyToken,
-  createProxyMiddleware(getProxyOptions(envs.REPORTES_SERVICE_URL, {
-    '^/api/reportes': ''
-  })),
+  createProxyMiddleware(getProxyOptions(envs.REPORTES_SERVICE_URL)),
 );
 
 /**
@@ -148,7 +122,7 @@ appRoutes.use(
   "/api/multimedia",
   traceIdMiddleware,
   verifyToken,
-  createProxyMiddleware(getProxyOptions(envs.MULTIMEDIA_SERVICE_URL, (path: string) => '/api/v1/multimedia' + path)),
+  createProxyMiddleware(getProxyOptions(envs.MULTIMEDIA_SERVICE_URL)),
 );
 
 /**
@@ -158,9 +132,7 @@ appRoutes.use(
   "/api/alertas",
   traceIdMiddleware,
   verifyToken,
-  createProxyMiddleware(getProxyOptions(envs.ALERTAS_SERVICE_URL, {
-    '^/api/alertas': ''
-  })),
+  createProxyMiddleware(getProxyOptions(envs.ALERTAS_SERVICE_URL)),
 );
 
 /**
@@ -171,5 +143,5 @@ appRoutes.use(
   "/api/emergencias",
   traceIdMiddleware,
   verifyToken, // Solo personal autorizado/autenticado puede disparar despachos
-  createProxyMiddleware(getProxyOptions(envs.EMERGENCIAS_SERVICE_URL, (path: string) => '/api/v1/emergencias' + path)),
+  createProxyMiddleware(getProxyOptions(envs.EMERGENCIAS_SERVICE_URL)),
 );

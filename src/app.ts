@@ -12,7 +12,6 @@ import { envs } from "./config/envs";
 import { corsOptions } from "./config/cors";
 import { morganLogger, logger } from "./config/logger";
 import { globalLimiter } from "./middlewares/rateLimiter";
-import { rateLimiterByUID } from "./middlewares/rateLimiterByUID";
 import { errorHandler } from "./middlewares/errorHandler";
 import { metricsMiddleware, metricsHandler } from "./middlewares/metrics.middleware";
 import { appRoutes } from "./routes/routes";
@@ -42,20 +41,17 @@ app.use(
     }),
 );
 app.use(cors(corsOptions));
-app.use(compression() as any);
+app.use(compression());
 app.use(morganLogger);
 
-// Limitador de fuerza bruta por IP (fallback)
-app.use(globalLimiter as any);
-
-// Limitador por UID (Redis-backed, para usuarios autenticados)
-app.use(rateLimiterByUID);
+// Limitador de fuerza bruta
+app.use(globalLimiter);
 
 // 📊 Monitoreo de métricas (Prometheus)
 app.use(metricsMiddleware);
 
 // 📖 Documentación Global (Unificada)
-app.use("/api/docs", swaggerUi.serve as any, swaggerUi.setup(swaggerDocument) as any);
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 📊 Endpoint de métricas Prometheus
 app.get("/metrics", metricsHandler);

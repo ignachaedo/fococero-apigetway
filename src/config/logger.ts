@@ -24,5 +24,5 @@ export const morganLogger =
   nodeEnv === "production" ? morgan(jsonFormat) : morgan("dev");
 
 export const logger = pino({
-  level: nodeEnv === "test" ? "silent" : nodeEnv === "production" ? "info" : "debug",
+  level: nodeEnv === "test" ? "silent" : "info",
 });

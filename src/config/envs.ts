@@ -14,7 +14,6 @@ const testDefaults = {
   ANALITICA_SERVICE_URL: "http://localhost:3007",
   EUREKA_HOST: "localhost",
   INTERNAL_SECRET_TOKEN: "test-token",
-  REDIS_URL: "redis://localhost:6379",
   FIREBASE_PROJECT_ID: "test-project",
   FIREBASE_CLIENT_EMAIL: "test@test.com",
   FIREBASE_PRIVATE_KEY: "test-key",
@@ -36,15 +35,15 @@ const envSchema = z.object({
   ANALITICA_SERVICE_URL: z.string().url().default("http://localhost:3007"),
   EUREKA_HOST: z.string().min(1).default("localhost"),
 
-  INTERNAL_SECRET_TOKEN: z.string().min(1),
-
-  // Redis para rate limiting
-  REDIS_URL: z.string().default("redis://redis-fococero:6379"),
+  INTERNAL_SECRET_TOKEN: z.string().min(1).default("test-token"),
 
   // Whitelist de CORS
   CORS_ORIGINS: z
     .string()
     .default("http://localhost:5173,http://localhost:3000"),
+
+  // Redis para rate limiting
+  REDIS_URL: z.string().default("redis://redis-fococero:6379"),
 
   // Seguridad: Firebase Admin SDK
   FIREBASE_PROJECT_ID: z.string().min(1).default("test-project"),

@@ -1,27 +1,7 @@
-/**
- * @fileoverview Manejador global de errores para el API Gateway.
- * Captura cualquier excepción no controlada en el pipeline de middleware
- * y retorna una respuesta estandarizada de error al cliente.
- * Express requiere exactamente 4 argumentos para identificar este middleware.
- */
-
 import { Request, Response, NextFunction } from "express";
 import { envs } from "../config/envs";
 import { logger } from "../config/logger";
 
-/**
- * Middleware global de manejo de errores para el API Gateway.
- *
- * @description Captura errores lanzados desde cualquier middleware anterior,
- * sanitiza la URL antes de loguearla (previene inyección en logs), y responde
- * con un mensaje genérico sin exponer detalles internos del servidor.
- * Los errores se asocian a un Trace ID para facilitar la depuración distribuida.
- *
- * @param err - Objeto de error capturado (puede contener statusCode propio)
- * @param req - Objeto Request de Express
- * @param res - Objeto Response de Express
- * @param _next - Función NextFunction (no utilizada, requerida por firma de Express)
- */
 export const errorHandler = (
   err: any,
   req: Request,
@@ -41,8 +21,10 @@ export const errorHandler = (
   );
 
   res.status(statusCode).json({
-    ok: false,
-    error: "Error de comunicación en la red perimetral (Gateway)",
+    success: false,
+    message: "Error de comunicación en la red perimetral (Gateway)",
+    error:
+      envs.NODE_ENV === "development" ? err.message : "Internal Server Error",
     traceId: traceId,
   });
 };

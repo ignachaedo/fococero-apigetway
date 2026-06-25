@@ -15,7 +15,6 @@ process.env.EUREKA_HOST = 'localhost';
 
 process.env.INTERNAL_SECRET_TOKEN = 'test-secret-token-for-testing';
 process.env.CORS_ORIGINS = 'http://localhost:5173';
-process.env.REDIS_URL = 'redis://localhost:6379';
 
 // Firebase mock values (these must pass Zod validation in envs.ts)
 process.env.FIREBASE_PROJECT_ID = 'test-project-id';
