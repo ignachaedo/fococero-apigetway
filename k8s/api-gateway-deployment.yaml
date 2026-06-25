@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: 711147367899.dkr.ecr.us-east-1.amazonaws.com/fococero-api-gateway:${IMAGE_TAG}
+          # Nombre exacto que tienes en tu repositorio de AWS ECR
+          image: 711147367899.dkr.ecr.us-east-1.amazonaws.com/fococero-apigetway:${IMAGE_TAG}
           ports:
             - containerPort: 3000
           env:
