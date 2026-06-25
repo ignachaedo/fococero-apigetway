@@ -29,7 +29,7 @@ describe('API Gateway - Integración del Flujo de Autenticación', () => {
   it('debería rechazar ruta protegida sin cabecera Authorization', async () => {
     const res = await request(app).get('/api/emergencias');
     expect(res.status).toBe(401);
-    expect(res.body).toHaveProperty('ok', false);
+    expect(res.body).toHaveProperty('success', false);
     expect(res.status).not.toBe(200);
   });
 
