@@ -23,20 +23,20 @@ spec:
               value: "3000"
             - name: NODE_ENV
               value: "production"
-            # URLs de Microservicios (DNS interno de K8s)
+            # URLs de Microservicios
             - name: AUTH_SERVICE_URL
               value: "http://ms-auth:3001"
             - name: REPORTES_SERVICE_URL
               value: "http://ms-reportes:3004"
             - name: ALERTAS_SERVICE_URL
               value: "http://ms-alertas:3003"
-            # Seguridad
+            # Seguridad: Inyectado desde el secreto api-gateway-secrets
             - name: INTERNAL_SECRET_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: api-gateway-secrets
                   key: INTERNAL_SECRET_TOKEN
-            # Firebase
+            # Firebase: Inyectado desde el pipeline (cd.yml)
             - name: FIREBASE_PROJECT_ID
               value: "${FIREBASE_PROJECT_ID}"
             - name: FIREBASE_CLIENT_EMAIL
