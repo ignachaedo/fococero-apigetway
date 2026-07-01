@@ -15,15 +15,37 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          # Nombre exacto que tienes en tu repositorio de AWS ECR
-          image: 711147367899.dkr.ecr.us-east-1.amazonaws.com/fococero-apigetway:${IMAGE_TAG}
+          image: 486507079259.dkr.ecr.us-east-1.amazonaws.com/fococero-api-gateway:${IMAGE_TAG}
           ports:
             - containerPort: 3000
           env:
             - name: PORT
               value: "3000"
+            - name: NODE_ENV
+              value: "production"
+            # URLs de Microservicios (DNS interno de K8s)
             - name: AUTH_SERVICE_URL
               value: "http://ms-auth:3001"
+            - name: REPORTES_SERVICE_URL
+              value: "http://ms-reportes:3004"
+            - name: ALERTAS_SERVICE_URL
+              value: "http://ms-alertas:3003"
+            # Seguridad
+            - name: INTERNAL_SECRET_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: api-gateway-secrets
+                  key: INTERNAL_SECRET_TOKEN
+            # Firebase
+            - name: FIREBASE_PROJECT_ID
+              value: "${FIREBASE_PROJECT_ID}"
+            - name: FIREBASE_CLIENT_EMAIL
+              value: "${FIREBASE_CLIENT_EMAIL}"
+            # Eureka Desactivado
+            - name: EUREKA_CLIENT_REGISTERWITHEUREKA
+              value: "false"
+            - name: EUREKA_CLIENT_FETCHREGISTRY
+              value: "false"
           resources:
             requests:
               cpu: "100m"
@@ -35,5 +57,5 @@ spec:
             httpGet:
               path: /health
               port: 3000
-            initialDelaySeconds: 5
+            initialDelaySeconds: 10
             periodSeconds: 10

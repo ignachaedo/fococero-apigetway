@@ -50,8 +50,14 @@ jobs:
       - name: Deploy to EKS
         env:
           IMAGE_TAG: ${{ github.sha }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
         run: |
+          # Sustituir variables en el despliegue
           sed -i "s|\${IMAGE_TAG}|$IMAGE_TAG|g" k8s/api-gateway-deployment.yaml
+          sed -i "s|\${FIREBASE_PROJECT_ID}|$FIREBASE_PROJECT_ID|g" k8s/api-gateway-deployment.yaml
+          sed -i "s|\${FIREBASE_CLIENT_EMAIL}|$FIREBASE_CLIENT_EMAIL|g" k8s/api-gateway-deployment.yaml
+
           kubectl apply -f k8s/api-gateway-deployment.yaml
           kubectl apply -f k8s/api-gateway-service.yaml
           kubectl apply -f k8s/api-gateway-hpa.yaml
