@@ -30,6 +30,17 @@ spec:
               value: "http://ms-reportes:3004"
             - name: ALERTAS_SERVICE_URL
               value: "http://ms-alertas:3003"
+            - name: GEO_SERVICE_URL
+              value: "http://ms-geo:3002"
+            - name: MULTIMEDIA_SERVICE_URL
+              value: "http://ms-multimedia:3005"
+            - name: EMERGENCIAS_SERVICE_URL
+              value: "http://ms-emergencias:3006"
+            - name: ANALITICA_SERVICE_URL
+              value: "http://ms-analitica:3007"
+            # CORS: Orígenes permitidos (separados por coma)
+            - name: CORS_ORIGINS
+              value: "http://localhost:5173,http://localhost:3000,http://ad57769170d9f4acdab82d17cd091c92-7f35ff8f99b3f857.elb.us-east-1.amazonaws.com"
             # Seguridad: Inyectado desde el secreto api-gateway-secrets
             - name: INTERNAL_SECRET_TOKEN
               valueFrom:
