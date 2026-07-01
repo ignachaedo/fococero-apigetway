@@ -38,9 +38,23 @@ spec:
                   key: INTERNAL_SECRET_TOKEN
             # Firebase: Inyectado desde el pipeline (cd.yml)
             - name: FIREBASE_PROJECT_ID
-              value: "${FIREBASE_PROJECT_ID}"
+              valueFrom:
+                {
+                  secretKeyRef:
+                    { name: firebase-secret, key: FIREBASE_PROJECT_ID },
+                }
             - name: FIREBASE_CLIENT_EMAIL
-              value: "${FIREBASE_CLIENT_EMAIL}"
+              valueFrom:
+                {
+                  secretKeyRef:
+                    { name: firebase-secret, key: FIREBASE_CLIENT_EMAIL },
+                }
+            - name: FIREBASE_PRIVATE_KEY
+              valueFrom:
+                {
+                  secretKeyRef:
+                    { name: firebase-secret, key: FIREBASE_PRIVATE_KEY },
+                }
             # Eureka Desactivado
             - name: EUREKA_CLIENT_REGISTERWITHEUREKA
               value: "false"
