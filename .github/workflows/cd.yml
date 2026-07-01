@@ -5,7 +5,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPOSITORY: fococero-apigateway
+  ECR_REPOSITORY: fococero-api-gateway
   EKS_CLUSTER_NAME: ${{ secrets.EKS_CLUSTER_NAME }}
 
 jobs:
