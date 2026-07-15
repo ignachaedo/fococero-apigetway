@@ -25,7 +25,7 @@ appRoutes.get("/health", (_req: Request, res: Response) => {
 // ============================================================================
 // 🛠️ CONFIGURACIÓN MAESTRA DEL PROXY
 // ============================================================================
-const getProxyOptions = (target: string): Options => ({
+const getProxyOptions = (target: string, pathPrefix?: string): Options => ({
   target,
   changeOrigin: true,
 
@@ -46,6 +46,33 @@ const getProxyOptions = (target: string): Options => ({
       // 🛡️ 2. Seguridad Zero-Trust: Inyectamos el token interno automáticamente.
       // Esto permite que los MS validen que la petición viene del Gateway.
       proxyReq.setHeader("x-internal-token", envs.INTERNAL_SECRET_TOKEN);
+
+      // 🔄 3. Path Rewrite: Express ya eliminó el prefijo de montaje,
+      // así que anteponemos el pathPrefix si está configurado.
+      if (pathPrefix) {
+        proxyReq.path = `${pathPrefix}${proxyReq.path}`;
+      }
+
+      logger.info(
+        `[Proxy Req] ${req.method} ${req.url} → ${proxyReq.path}`,
+      );
+    },
+
+    proxyRes: (proxyRes: IncomingMessage, req: IncomingMessage) => {
+      const statusCode = proxyRes.statusCode || 0;
+      const method = req.method || "GET";
+      const url = req.url || "/";
+      const traceId = req.headers["x-trace-id"] || "N/A";
+
+      if (statusCode >= 400) {
+        logger.error(
+          `[Proxy Response | Trace: ${traceId}] ${method} ${url} → ${statusCode} from ${target}`,
+        );
+      } else {
+        logger.info(
+          `[Proxy Response] ${method} ${url} → ${statusCode}`,
+        );
+      }
     },
 
     error: (err: Error, req: IncomingMessage, res: ServerResponse | Socket) => {
@@ -91,7 +118,7 @@ appRoutes.use(
   "/api/analitica",
   traceIdMiddleware,
   verifyToken,
-  createProxyMiddleware(getProxyOptions(envs.ANALITICA_SERVICE_URL)),
+  createProxyMiddleware(getProxyOptions(envs.ANALITICA_SERVICE_URL, "/api/v1/analitica")),
 );
 
 /**
@@ -122,7 +149,16 @@ appRoutes.use(
   "/api/multimedia",
   traceIdMiddleware,
   verifyToken,
-  createProxyMiddleware(getProxyOptions(envs.MULTIMEDIA_SERVICE_URL)),
+  createProxyMiddleware(getProxyOptions(envs.MULTIMEDIA_SERVICE_URL, "/api/v1/multimedia")),
+);
+
+/**
+ * 🗂️ ARCHIVOS ESTÁTICOS (uploads) del servicio multimedia
+ * Sirve imágenes y archivos subidos sin autenticación (son URLs públicas).
+ */
+appRoutes.use(
+  "/uploads",
+  createProxyMiddleware(getProxyOptions(envs.MULTIMEDIA_SERVICE_URL, "/uploads")),
 );
 
 /**
