@@ -6,29 +6,30 @@ on:
     branches: ["main", "develop"]
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  construir-y-verificar:
+    name: Construir y Verificar
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 22
+      - name: Configurar Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: "npm"
 
-      - name: Install dependencies
+      - name: Instalar dependencias
         run: npm ci
 
-      - name: Run Tests with Coverage
+      - name: Ejecutar pruebas con cobertura
         run: npm test -- --coverage
         env:
           NODE_ENV: test
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          INTERNAL_SECRET_TOKEN: test-token
 
-      - name: Build Project
+      - name: Compilar proyecto
         run: npm run build
