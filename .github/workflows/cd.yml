@@ -52,9 +52,10 @@ jobs:
             --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Crear secreto de Firebase
+        env:
+          FB_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
         run: |
-          printf '%s\n' "${{ secrets.FIREBASE_PRIVATE_KEY }}" | sed -e 's/\\n/\n/g' > /tmp/firebase-key.pem
-          
+          echo "$FB_KEY" > /tmp/firebase-key.pem
           kubectl create secret generic firebase-secret \
             --from-literal=FIREBASE_PROJECT_ID="${{ secrets.FIREBASE_PROJECT_ID }}" \
             --from-literal=FIREBASE_CLIENT_EMAIL="${{ secrets.FIREBASE_CLIENT_EMAIL }}" \
