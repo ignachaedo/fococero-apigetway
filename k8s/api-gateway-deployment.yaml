@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: api-gateway
-          image: 486507079259.dkr.ecr.us-east-1.amazonaws.com/fococero-api-gateway:${IMAGE_TAG}
+          image: 663719127850.dkr.ecr.us-east-1.amazonaws.com/fococero-api-gateway:${IMAGE_TAG}
           ports:
             - containerPort: 3000
           env:
