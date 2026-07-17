@@ -3,7 +3,7 @@ import { envs } from "./envs";
 import { logger } from "./logger";
 import type { Request, Response, NextFunction } from "express";
 
-// Lista blanca dinámica basada en envs
+// Lista blanca dinámica basada en envss
 const allowedOrigins = envs.CORS_ORIGINS.split(",").map((origin) =>
   origin.trim(),
 );
