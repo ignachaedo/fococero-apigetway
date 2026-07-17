@@ -70,3 +70,7 @@ jobs:
           kubectl apply -f k8s/api-gateway-deployment.yaml
           kubectl apply -f k8s/api-gateway-service.yaml
           kubectl apply -f k8s/api-gateway-hpa.yaml
+
+      - name: Verificar despliegue
+        run: |
+          kubectl rollout status deployment/api-gateway -n fococero --timeout=180s
